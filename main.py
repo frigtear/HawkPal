@@ -7,15 +7,15 @@ import webbrowser
 from datetime import datetime
 import atexit
 
+with open("config.json", "r") as f:
+    config = json.load(f)
 
-url = 'https://canvas.instructure.com/api/v1'
-icon_url = 'https://uiowa.instructure.com'
-canvas_url = 'https://canvas.instructure.com'
+url = config["url"]
+icon_url = config["icon_url"]
+canvas_url = config["canvas_url"]
+token = config["token"]
+limit = config["limit"]
 
-
-
-
-token = '4298~ykHPdZm7hyX9Zo1Iqs6GxQnYE6fpFaVcONGitBuEHPfhrZrgHH5Nmavzu64RgLQZ'
 
 auth = {'Authorization':'Bearer ' + token}
 
@@ -26,17 +26,17 @@ style = ttk.Style()
 style.configure("TButton", foreground="yellow")
 style.configure('TLabel', foreground='yellow')
 
+
 ttk.Label(root,text="Classes:").grid(row=0,column=0)
 ttk.Label(root,text="Tabs1").grid(row=0,column=1)
 ttk.Label(root,text="Tabs2").grid(row=0,column=2)
 ttk.Label(root,text="Tabs3").grid(row=0,column=3)
-limit = 20
 
 
 pin_button_list = []
 unpin_button_list = []
 
-with open('/Users/reubensonnenschein/Downloads/Projects/hawkpal/pins.json','r') as f:
+with open('pins.json','r') as f:
     course_pins = json.load(f)
 
 # Automatically sets settings for tk.Toplevel
@@ -44,23 +44,31 @@ def configure_tl(toplevel,title='',geometry='1000x500',resizable=False):
     toplevel.resizable(resizable,resizable)
     toplevel.geometry(geometry)
     toplevel.title(title)
+
+
 def save_data():
-    with open('/Users/reubensonnenschein/Downloads/Projects/hawkpal/pins.json','w') as f:
+    with open('pins.json','w') as f:
         json.dump(course_pins,f)
 
 atexit.register(save_data)
+
+
 def pin(course,tab,row):
     id = str(course['id'])
     course_pins[id].append(tab)
 
+
 def unpin(course,tab,row):
     id = str(course['id'])
     course_pins[id].remove(tab)
+
+
 def display_error_window(message):
     err_window = tk.Toplevel(root)
     configure_tl(err_window,title="Error!",geometry='200x200')
     ttk.Label(err_window,text=message).pack()
     ttk.Button(err_window, text="Click here to quit. Email rsonnenschein@uiowa if this error persists",command=quit)
+
 
 # Checks if requests.response object returned valid json
 def get_json(response):
@@ -91,8 +99,6 @@ def display_submodules(module,items):
     submod_window = tk.Toplevel()
     configure_tl(submod_window, title=module['name'])
     for item in items:
-        #print(item)
-        #print(module)
         try:
             url = item['html_url']
             url = url.replace(canvas_url,icon_url)
